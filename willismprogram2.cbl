@@ -1,31 +1,31 @@
        IDENTIFICATION DIVISION.
-       PROGRAM-ID. PROJECT1.
-
-      **********************************************************
-      *  This program reads data from external data files
-      *
-      *  and takes the file and splits up the data
-      *  for each product
-      *
-      *  INPUT:  catalog number, item decription, unit purchace price,
-      *    quanity on hand, quanity on order, reorder point, quanity re-
-      *    cieved, quanity sold, and quanit returned during the week
-      *  OUTPUT: report title, date, y3i, catalog number, item descript-
-      *    on, purchae price, quanity on hand, quantiny on hand, quanity
-      *    on order, reorder
+       PROGRAM-ID.    PROGRAM2.
+       AUTHOR.        MATTHEW-WILLIS.
+      ***************************************************************
+      * This program reads data from an an external file called
+      * inventory-totals and outputs a summary report showing the quanit
+      * of medications and the cost of all the medications and it is
+      * sorted by product name.
       *
       *
+      * INPUT: Inventory-totals "PR2FA17.TXT". Which contains:
+      * Customer-ID,CUSTOMER-NAME, PROD-ID, PROD-NAME, Qty-SOLD,
+      * COST-PER-ITEM.
       *
       *
+      * OUTPUT: Report-file "INVENTORY-OUT.TXT" which has:
+      * customer name product-id, product-name,qty-sold, sales-vale,
+      *  total: ,total amount sold, and total value of sales.
       *
       *
-      *
-      *
-      *
+      * Calculations: Total QTY sold, total sales value,
+      * Total qty sold overall, total value of sales overall
       *
       *
       *
-      **********************************************************
+      *
+      *
+      ***************************************************************
        ENVIRONMENT DIVISION.
        CONFIGURATION SECTION.
        SOURCE-COMPUTER. IBM-PC.
@@ -53,7 +53,7 @@
            05 FILLER           PIC X(5).
            05 PROD-NAME-IN     PIC X(14).
            05 QTY-SOLD-IN      PIC 9(3).
-           05 COST-PER-ITEM-IN PIC 9(5).
+           05 COST-PER-ITEM-IN PIC 9(3)V9(2).
 
 
        FD  REPORT-FILE.
@@ -65,7 +65,7 @@
        01  WS-WORK-AREAS.
            05 EOF-FLAG         PIC X(3) VALUE 'YES'.
            05 PROPER-SPACING   PIC 99 VALUE 0.
-           05 IS-PROD-NAME-SAME PIC X(3) VALUE 'YES'.
+           05 PROD-NAME-SAME PIC X(3) VALUE 'NEW'.
        01  WS-CURRENT-DATE-DATA.
              05  WS-CURRENT-DATE.
                    10 WS-CURRENT-YEAR      PIC 9(4).
@@ -73,13 +73,13 @@
                    10 WS-CURRENT-DAY       PIC 9(2).
 
        01  WS-TEMP-VARIABLES.
-           05 SAME-PROD-NAME           PIC X(14).
-           05 TEMP-PROD-ID             PIC X(3).
-           05 TEMP-SALES-VALUE         PIC 9(6)V9(2).
-           05 TEMP-QTY-SOLD-TOTAL      PIC 9(3)9(3).
-           05 TEMP-SALES-VALUE-TOTAL   PIC 9(7)V9(2).
-           05 TEMP-TOTAL-AMUNT-SOLD    PIC 9(7).
-           05 TEMP-TOT-VAL-SALES       PIC 9(10)V9(2).
+           05 WS-SALES-VALUE           PIC 9(6)V9(2).
+           05 WS-GRP-QTY               PIC 9(6).
+           05 WS-QTY-HOLDER            PIC 9(7).
+           05 WS-SV-HOLDER             PIC 9(10)V9(2).
+           05 WS-GRP-SV                PIC 9(7)V9(2).
+           05 WS-GRAND-QTY             PIC 9(7).
+           05 WS-GRAND-SV              PIC 9(10)V9(2).
 
        01  HEADING-LINE1.
            05 FILLER   PIC X(33).
@@ -101,10 +101,10 @@
            05 HL2-Y3I              PIC X(3) VALUE 'MAW'.
 
        01  HEADING-LINE3.
-           05 FILLER       PIC X(73).
+           05 FILLER       PIC X(73) VALUE SPACES.
 
        01  HEADING-LINE4.
-           05 FILLER PIC X(73).
+           05 FILLER PIC X(73) VALUE SPACES.
 
 
 
@@ -132,7 +132,7 @@
            05 HL6-VALUE        PIC X(5) VALUE 'VALUE'.
 
        01  HEADING-LINE7.
-           05 FILLER PIC X(73).
+           05 FILLER PIC X(73) VALUE SPACES.
 
        01  OUTPUT-LINE.
            05 FILLER           PIC X(1).
@@ -147,22 +147,22 @@
            05 SALES-VALUE-OUT  PIC Z(3),Z(3).99.
 
        01  HEADING-LINE8.
-           05 FILLER  PIC X(73).
+           05 FILLER  PIC X(73) VALUE SPACES.
 
        01  TOTAL-HEADER.
            05 FILLER               PIC X(31).
            05 TOTAL                PIC X(6) VALUE 'TOTAL:'.
            05 FILLER               PIC X(13).
-           05 QTY-SOLD-TOTAL       PIC 9(6).
+           05 QTY-SOLD-TOTAL       PIC Z(3)9(3).
            05 FILLER               PIC X(2).
            05 MONEY                PIC X(1) VALUE '$'.
            05 SALES-VALUE-TOTAL-OUT   PIC Z(1),Z(3),Z(3).99.
 
        01  HEADING-LINE9.
-           05 FILLER   PIC X(73).
+           05 FILLER   PIC X(73) VALUE SPACES.
 
        01  HEADING-LINE10.
-           05  FILLER  PIC X(73).
+           05  FILLER  PIC X(73) VALUE SPACES.
 
        01  TOTAL-AMUNT-LINE.
            05  FILLER          PIC X(30).
@@ -180,7 +180,7 @@
            05  OFD              PIC X(3) VALUE 'OF '.
            05  SALES            PIC X(6) VALUE 'SALES:'.
            05 MONEY             PIC X(1) VALUE '$'.
-           05  TOT-VAL-SALES    PIC Z(1),Z(3),Z(3),Z(2).99.
+           05  TOT-VAL-SALES    PIC Z(1),Z(3),Z(3),Z(3).99.
            05  FILLER           PIC X(2).
 
 
@@ -241,10 +241,7 @@
            WRITE REPORT-REC
            MOVE HEADING-LINE8 TO REPORT-REC
            WRITE REPORT-REC
-           MOVE HEADING-LINE9 TO REPORT-REC
-           WRITE REPORT-REC
-           MOVE HEADING-LINE10 TO REPORT-REC
-           WRITE REPORT-REC
+
            .
        150-MOVE-WITHNO-CALC.
            MOVE CUS-NAME-IN TO CUS-NAME-OUT
@@ -252,56 +249,92 @@
            MOVE PROD-ID-IN TO PROD-ID-OUT
 
            .
+       175-PARAGRAPH-LAYOUT.
 
-       200-PROCESS-RTN.
-           IF PROD-NAME-IN IS EQUAL TO SAME-PROD-NAME
-               MOVE '' TO PROD-NAME-OUT
-           ELSE
-               IF SAME-PROD-NAME IS EQUAL TO 'NO'
-                   MOVE PROD-NAME-IN TO SAME-PROD-NAME
-                   MOVE PROD-NAME-IN TO PROD-NAME-OUT
-               ELSE
-                   MOVE PROD-NAME-IN TO SAME-PROD-NAME
-                   MOVE PROD-NAME-IN TO PROD-NAME-OUT
-                   MOVE TEMP-QTY-SOLD-TOTAL TO QTY-SOLD-TOTAL
-                   MOVE TEMP-SALES-VALUE-TOTAL TO SALES-VALUE-TOTAL-OUT
-                   MOVE TOTAL-HEADER TO REPORT-REC
-                   MOVE 2 TO PROPER-SPACING
-                   WRITE REPORT-REC
-                   MOVE 2 TO PROPER-SPACING
-                   MOVE 0 TO TEMP-TOTAL-AMUNT-SOLD
-                   MOVE 0 TO TEMP-SALES-VALUE-TOTAL
-                 END-IF
-             END-IF
-
-           PERFORM 150-MOVE-WITHNO-CALC.
-           COMPUTE TEMP-SALES-VALUE =
+           COMPUTE WS-SALES-VALUE =
                    COST-PER-ITEM-IN * QTY-SOLD-IN
-           MOVE TEMP-SALES-VALUE TO SALES-VALUE-OUT
+           MOVE WS-SALES-VALUE TO SALES-VALUE-OUT
+           COMPUTE WS-SV-HOLDER=
+                   WS-SALES-VALUE + WS-SV-HOLDER
+           COMPUTE WS-QTY-HOLDER =
+                   WS-QTY-HOLDER + QTY-SOLD-IN
+           MOVE WS-SV-HOLDER TO SALES-VALUE-TOTAL-OUT
 
-           COMPUTE TEMP-QTY-SOLD-TOTAL =
-                   QTY-SOLD-IN + TEMP-QTY-SOLD-TOTAL
-           COMPUTE TEMP-SALES-VALUE-TOTAL =
-                   QTY-SOLD-IN + TEMP-SALES-VALUE-TOTAL
-           COMPUTE TEMP-TOT-VAL-SALES =
-                   TEMP-SALES-VALUE + TEMP-TOT-VAL-SALES
+           COMPUTE WS-GRP-QTY =
+                   QTY-SOLD-IN + WS-GRP-QTY
+           MOVE WS-GRP-QTY TO QTY-SOLD-TOTAL
+           COMPUTE WS-GRP-SV =
+                   WS-SALES-VALUE + WS-GRP-SV
+
+
+
+
+           PERFORM 150-MOVE-WITHNO-CALC
            MOVE OUTPUT-LINE TO REPORT-REC
+           MOVE 1 TO PROPER-SPACING
            WRITE REPORT-REC
            AFTER ADVANCING PROPER-SPACING
-            MOVE 1 TO PROPER-SPACING
+           MOVE 2 TO PROPER-SPACING
+
+
+
+           .
+
+
+       200-PROCESS-RTN.
+
+           IF PROD-NAME-SAME IS EQUAL TO 'NEW'
+                   MOVE PROD-ID-IN TO PROD-NAME-SAME
+                   MOVE PROD-NAME-IN TO PROD-NAME-OUT
+                   PERFORM 175-PARAGRAPH-LAYOUT
+
+           ELSE IF PROD-ID-IN IS EQUAL TO PROD-NAME-SAME
+               MOVE '' TO PROD-NAME-OUT
+
+               PERFORM 175-PARAGRAPH-LAYOUT
+
+
+
+               ELSE
+
+                    MOVE PROD-NAME-IN TO PROD-NAME-OUT
+                    MOVE WS-GRP-QTY TO QTY-SOLD-TOTAL
+                    MOVE WS-GRP-SV TO SALES-VALUE-TOTAL-OUT
+                    MOVE TOTAL-HEADER TO REPORT-REC
+                    WRITE REPORT-REC
+                    AFTER ADVANCING PROPER-SPACING
+                    MOVE PROD-ID-IN TO PROD-NAME-SAME
+                    MOVE 0 TO WS-GRP-SV
+                    MOVE 0 TO WS-GRP-QTY
+                   PERFORM 175-PARAGRAPH-LAYOUT
+
+
+             END-IF
+            END-IF
+
+
+
+
+
            .
 
        300-END-ROUTINE.
-           MOVE TEMP-QTY-SOLD-TOTAL TO QTY-SOLD-TOTAL
-           MOVE TEMP-TOT-VAL-SALES TO TOT-VAL-SALES
+
+           COMPUTE WS-GRAND-QTY =
+                   WS-QTY-HOLDER + WS-GRAND-QTY
+
+           COMPUTE WS-GRAND-SV =
+                       WS-SV-HOLDER + WS-GRAND-SV
+           MOVE WS-GRP-SV TO SALES-VALUE-TOTAL-OUT
+           MOVE WS-GRAND-SV TO TOT-VAL-SALES
+           MOVE WS-GRAND-QTY TO TOTAL-AMUNT-SOLD
            MOVE TOTAL-HEADER TO REPORT-REC
            MOVE 2 TO PROPER-SPACING
            WRITE REPORT-REC
            AFTER ADVANCING PROPER-SPACING
            MOVE 2 TO PROPER-SPACING
-           MOVE TEMP-QTY-SOLD-TOTAL TO TOTAL-AMUNT-SOLD
-           MOVE TEMP-TOT-VAL-SALES TO TOTAL-VAL-LINE
-           MOVE TOTAL-AMUNT-SOLD TO REPORT-REC
+
+           MOVE TOTAL-AMUNT-LINE TO REPORT-REC
            WRITE REPORT-REC
            AFTER ADVANCING PROPER-SPACING
            MOVE 2 TO PROPER-SPACING
