@@ -19,4 +19,6 @@ At the same time 130 reads the files into until the EOF flag = no and then it wi
 In process 200 Process Rtn. If the prod name is the same is equal to 'New' then it will move the id into the name same variable as well as move the name in to  it will then pull 175 program layout.
 After that 300 end routine runs and it calculates the grand total by adding the qty holder and grand qty.
 It calculates Grand SV or sales value by adding the holder for the sales value and adding it to its self.
-It then moves all the data to its output lines and then moves 2. To proper spacing and then begins  to write the report rec. It goes line by line adding the data and moving 2 to proper spacing after each data set as been written
+It then moves all the data to its output lines and then moves 2. To proper spacing and then begins to write the report rec. It goes line by line adding the data and moving 2 to proper spacing after each data set as been written.
+
+Once it is done calculating all of the data, it outputs it all as a text file.
